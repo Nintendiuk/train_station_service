@@ -12,6 +12,13 @@ from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from rest_framework_simplejwt.exceptions import (
+    AuthenticationFailed,
+    InvalidToken,
+)
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+)
 
 from train_station.models import (
     Crew,
@@ -207,6 +214,7 @@ class JourneyViewSet(ModelViewSet):
             .order_by("departure_time")
         )
 
+        # Optional filters
         source = self.request.query_params.get("source")
         destination = self.request.query_params.get("destination")
         date = self.request.query_params.get("date")
@@ -262,3 +270,31 @@ class OrderViewSet(ModelViewSet):
     def perform_create(self, serializer) -> None:
         """Attach the requesting user to the new order."""
         serializer.save(user=self.request.user)
+
+
+# ---------------------------------------------------------------------------
+# Custom JWT view — returns 401 on bad credentials (instead of 400)
+# ---------------------------------------------------------------------------
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    """TokenObtainPairView that returns 401 on invalid credentials.
+
+    SimpleJWT returns 400 by default; this view overrides that to
+    return the semantically correct 401 Unauthorized status.
+    """
+
+    def post(self, request, *args, **kwargs):
+        """Return 401 instead of 400 for invalid credentials."""
+        serializer = self.get_serializer(data=request.data)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except (InvalidToken, AuthenticationFailed) as e:
+            return Response(
+                e.detail,
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+        return Response(
+            serializer.validated_data,
+            status=status.HTTP_200_OK,
+        )

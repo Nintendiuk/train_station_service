@@ -5,7 +5,6 @@ Cover field presence, validation logic, and nested creation.
 """
 import pytest
 from django.utils import timezone
-from rest_framework.exceptions import ValidationError
 
 from train_station.serializers import (
     JourneyWriteSerializer,

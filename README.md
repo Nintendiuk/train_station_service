@@ -28,22 +28,6 @@ train_station/           ← Main application (models, views, serializers)
 tests/                   ← All pytest test suites
 ```
 
-### Domain Model (class diagram)
-
-```
-Station ──< Route >── Station
-             │
-             ▼
-           Journey ──< Ticket >── Order
-             │
-          TrainType
-             │
-            Train
-             │
-            Crew
-```
-
----
 
 ## Quick Start (Docker)
 
@@ -195,16 +179,6 @@ Content-Type: application/json
 | `POSTGRES_PASSWORD` | `train_password` | DB password |
 | `POSTGRES_HOST` | `db` | DB host (Docker service name) |
 | `POSTGRES_PORT` | `5432` | DB port |
-
----
-
-## Development Stages
-
-- [x] **Stage 1** — Infrastructure (Docker, PostgreSQL, JWT, Swagger, flake8)
-- [ ] **Stage 2** — Data Models (Station, TrainType, Train, Route)
-- [ ] **Stage 3** — Journeys & Crew (filtering, search)
-- [ ] **Stage 4** — Booking System (Orders, Tickets, transactions)
-- [ ] **Stage 5** — Full API & Documentation polish
 
 ---
 

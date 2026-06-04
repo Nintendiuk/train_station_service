@@ -15,10 +15,11 @@ services:
   web:
     build: .
     command: >
-      sh -c "python manage.py migrate &&
-             python manage.py collectstatic --noinput &&
-             gunicorn train_station_service.wsgi:application
-             --bind 0.0.0.0:8000"
+      command: >
+            sh -c "./wait-for-db.sh db &&
+                   python manage.py migrate &&
+                   python manage.py collectstatic --noinput &&
+                   gunicorn train_station_service.wsgi:application --bind 0.0.0.0:8000"
     volumes:
       - .:/app
       - static_volume:/vol/web/static

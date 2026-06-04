@@ -88,24 +88,21 @@ class TestJWTEndpoints(TestCase):
         url = reverse("token_verify")
         self.assertIsNotNone(url)
 
-    def test_token_obtain_returns_400_on_bad_credentials(self):
-        """POST with wrong credentials → 400, not 404/500."""
-        url = reverse("token_obtain_pair")
-        response = self.client.post(
-            url,
-            {"username": "nobody", "password": "wrong"},
-            format="json",
-        )
-        self.assertEqual(
-            response.status_code, status.HTTP_401_UNAUTHORIZED
-        )
+    def test_token_obtain_returns_400_on_missing_data(self):
 
-    def test_token_obtain_returns_401_on_missing_body(self):
-        url = reverse("token_obtain_pair")
-        response = self.client.post(url, {}, format="json")
-        self.assertEqual(
-            response.status_code, status.HTTP_400_BAD_REQUEST
+        response = self.client.post(
+            reverse("token_obtain_pair"), {}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST
+                         )
+
+    def test_token_obtain_returns_401_on_bad_credentials(self):
+
+        response = self.client.post(
+            reverse("token_obtain_pair"),
+            {"email": "wrong@test.com", "password": "wrong"},
+            format="json"
         )
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 class TestSwaggerEndpoints(TestCase):

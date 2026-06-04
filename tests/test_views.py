@@ -16,11 +16,11 @@ from train_station.models import (
     Station,
 )
 
+
 def get_items(response):
     """Unwrap paginated or plain list response."""
     data = response.data
     return data["results"] if isinstance(data, dict) else data
-
 
 
 # ---------------------------------------------------------------------------
