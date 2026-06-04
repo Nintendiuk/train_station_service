@@ -57,13 +57,13 @@ class UserManager(BaseUserManager):
 class User(AbstractUser):
     """Custom user model with email login."""
 
-    username = None  # type: ignore[assignment]
+    username = None
     email = models.EmailField(_("email address"), unique=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
-    objects = UserManager()  # type: ignore[assignment]
+    objects = UserManager()
 
     def __str__(self) -> str:
         return self.email
