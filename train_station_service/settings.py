@@ -2,13 +2,14 @@
 Train Station Service – main Django settings.
 """
 import os
+import dj_database_url
 from pathlib import Path
+from datetime import timedelta  # noqa: E402
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get(
-    "SECRET_KEY", "dev-secret-key-change-in-production"
-)
+SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key-fallback")
+
 DEBUG = bool(int(os.environ.get("DEBUG", 1)))
 
 ALLOWED_HOSTS = ["*"]
@@ -58,16 +59,15 @@ TEMPLATES = [
 WSGI_APPLICATION = "train_station_service.wsgi.application"
 
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
-if DATABASE_URL:
-    import dj_database_url  # type: ignore
-    DATABASES = {"default": dj_database_url.config(default=DATABASE_URL)}
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
-    }
+DATABASES = {
+    "default": dj_database_url.config(
+        default=os.environ.get(
+            "DATABASE_URL",
+            f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
+        ),
+        conn_max_age=600,
+    )
+}
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -115,8 +115,6 @@ REST_FRAMEWORK = {
         "rest_framework.filters.OrderingFilter",
     ],
 }
-
-from datetime import timedelta  # noqa: E402
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),

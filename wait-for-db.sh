@@ -12,4 +12,5 @@ until pg_isready -h "$host" -p 5432; do
 done
 
 echo "Postgres is up - executing command"
-exec "$0"
+
+exec "$@"

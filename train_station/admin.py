@@ -6,7 +6,11 @@ from .models import (
 )
 
 
-admin.site.register(User, UserAdmin)
+@admin.register(User)
+class CustomUserAdmin(UserAdmin):
+    ordering = ('email',)
+    list_display = ('email', 'first_name', 'last_name', 'is_staff')
+
 
 admin.site.register(Station)
 admin.site.register(TrainType)
