@@ -16,6 +16,12 @@ from train_station.models import (
     Station,
 )
 
+def get_items(response):
+    """Unwrap paginated or plain list response."""
+    data = response.data
+    return data["results"] if isinstance(data, dict) else data
+
+
 
 # ---------------------------------------------------------------------------
 # Helper
@@ -44,7 +50,7 @@ class TestStationViewSet:
         client = auth_client(regular_user)
         response = client.get(reverse("train_station:station-list"))
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) == 2
+        assert len(get_items(response)) == 2
 
     def test_retrieve_station(self, regular_user, station_kyiv):
         """GET /stations/{pk}/ → 200 with correct data."""
@@ -105,7 +111,7 @@ class TestTrainTypeViewSet:
         client = auth_client(regular_user)
         response = client.get(reverse("train_station:traintype-list"))
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) >= 1
+        assert len(get_items(response)) >= 1
 
     def test_create_train_type_admin(self, admin_user):
         """Admin POST /train-types/ → 201."""
@@ -142,7 +148,7 @@ class TestTrainViewSet:
         client = auth_client(regular_user)
         response = client.get(reverse("train_station:train-list"))
         assert response.status_code == status.HTTP_200_OK
-        assert response.data[0]["name"] == "Intercity+"
+        assert get_items(response)[0]["name"] == "Intercity+"
 
     def test_retrieve_train_detail(self, regular_user, train):
         """GET /trains/{pk}/ → 200 with nested train_type."""
@@ -172,7 +178,7 @@ class TestTrainViewSet:
         """Train list should include calculated capacity."""
         client = auth_client(regular_user)
         response = client.get(reverse("train_station:train-list"))
-        assert response.data[0]["capacity"] == train.capacity
+        assert get_items(response)[0]["capacity"] == train.capacity
 
 
 # ---------------------------------------------------------------------------
@@ -189,7 +195,7 @@ class TestCrewViewSet:
         client = auth_client(regular_user)
         response = client.get(reverse("train_station:crew-list"))
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) == 1
+        assert len(get_items(response)) == 1
 
     def test_create_crew_admin(self, admin_user):
         """Admin POST /crew/ → 201."""
@@ -216,7 +222,7 @@ class TestRouteViewSet:
         client = auth_client(regular_user)
         response = client.get(reverse("train_station:route-list"))
         assert response.status_code == status.HTTP_200_OK
-        assert isinstance(response.data[0]["source"], str)
+        assert isinstance(get_items(response)[0]["source"], str)
 
     def test_retrieve_route_detail(self, regular_user, route):
         """GET /routes/{pk}/ → 200 with nested station objects."""
@@ -276,7 +282,7 @@ class TestJourneyViewSet:
         client = auth_client(regular_user)
         response = client.get(reverse("train_station:journey-list"))
         assert response.status_code == status.HTTP_200_OK
-        assert "tickets_available" in response.data[0]
+        assert "tickets_available" in get_items(response)[0]
 
     def test_retrieve_journey_detail(self, regular_user, journey):
         """GET /journeys/{pk}/ → 200 with nested route/train."""
@@ -313,7 +319,7 @@ class TestJourneyViewSet:
         url = reverse("train_station:journey-list") + "?source=Kyiv"
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) >= 1
+        assert len(get_items(response)) >= 1
 
     def test_filter_journey_by_nonexistent_source(
         self, regular_user, journey
@@ -325,7 +331,7 @@ class TestJourneyViewSet:
         )
         response = client.get(url)
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) == 0
+        assert len(get_items(response)) == 0
 
     def test_journey_tickets_available_decreases(
         self, regular_user, journey, ticket
@@ -333,7 +339,7 @@ class TestJourneyViewSet:
         """tickets_available should be reduced after a ticket is created."""
         client = auth_client(regular_user)
         response = client.get(reverse("train_station:journey-list"))
-        available = response.data[0]["tickets_available"]
+        available = get_items(response)[0]["tickets_available"]
         assert available == journey.train.capacity - 1
 
 

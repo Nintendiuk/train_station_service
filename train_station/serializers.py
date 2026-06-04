@@ -207,7 +207,9 @@ class JourneyListSerializer(serializers.ModelSerializer):
 
     def get_tickets_available(self, obj: Journey) -> int:
         """Compute remaining seats for this journey."""
-        taken = obj.tickets.count()
+        taken = getattr(obj, "tickets_sold", None)
+        if taken is None:
+            taken = obj.tickets.count()
         return obj.train.capacity - taken
 
 

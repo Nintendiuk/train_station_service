@@ -204,6 +204,7 @@ class JourneyViewSet(ModelViewSet):
             )
             .prefetch_related("crew")
             .annotate(tickets_sold=Count("tickets"))
+            .order_by("departure_time")
         )
 
         source = self.request.query_params.get("source")
